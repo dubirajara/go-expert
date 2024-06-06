@@ -50,10 +50,10 @@ func QuoteCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	select {
 	case <-time.After(200 * time.Millisecond):
 		log.Println("Request processed successfully")
-		go SaveDBQuoteCurrency(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
+		go SaveDBQuoteCurrency(resp)
 
 	case <-ctx.Done():
 		msg := "Request canceled by client"
@@ -64,13 +64,20 @@ func QuoteCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getQuoteCurrency() (*QuoteCurrency, error) {
-	req, err := http.Get("https://economia.awesomeapi.com.br/json/last/USD-BRL")
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
 
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	defer req.Body.Close()
-	resp, err := io.ReadAll(req.Body)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Fatalf("Could not do request: %v\n", err)
+	}
+	defer res.Body.Close()
+
+	resp, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
