@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/valyala/fastjson"
@@ -28,11 +29,24 @@ type QuoteCurrency struct {
 	CreateDate string `json:"create_date"`
 }
 
+func recoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("Recovered panic", r)
+				debug.PrintStack()
+				http.Error(w, "Something went wrong, internal error", http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
 func Start() {
 	log.Println("Server started...")
 	mux := http.NewServeMux()
 	mux.HandleFunc("/cotacao", QuoteCurrencyHandler)
-	if error := http.ListenAndServe(":8080", mux); error != nil {
+	if error := http.ListenAndServe(":8080", recoveryMiddleware(mux)); error != nil {
 		log.Fatalf("Could not listen th server: %v\n", error)
 	}
 
@@ -48,17 +62,18 @@ func QuoteCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer log.Println("Request finished.")
 	select {
-	case <-time.After(200 * time.Millisecond):
-		log.Println("Request processed successfully")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
-		go SaveDBQuoteCurrency(resp)
 
 	case <-ctx.Done():
 		msg := "Request canceled by client"
 		log.Println(msg)
 		http.Error(w, msg, http.StatusRequestTimeout)
+
+	default:
+		log.Println("Request processed successfully")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
+		go SaveDBQuoteCurrency(resp)
 
 	}
 }
@@ -73,7 +88,7 @@ func getQuoteCurrency() (*QuoteCurrency, error) {
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatalf("Could not do request: %v\n", err)
+		panic(err)
 	}
 	defer res.Body.Close()
 

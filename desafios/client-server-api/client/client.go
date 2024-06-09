@@ -22,24 +22,28 @@ func main() {
 func client(ch chan string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
+
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
 		panic(err)
-
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		panic(err)
 	}
-	defer res.Body.Close()
+	defer resp.Body.Close()
 
-	resp, err := io.ReadAll(res.Body)
-	if err != nil {
+	body, err := io.ReadAll(resp.Body)
+	switch {
+	case err != nil:
 		panic(err)
+	case resp.StatusCode != http.StatusOK:
+		panic(fmt.Errorf("%s status code: %d", string(body), resp.StatusCode))
 	}
+
 	var data server.QuoteCurrency
-	if err := json.Unmarshal(resp, &data); err != nil {
+	if err := json.Unmarshal(body, &data); err != nil {
 		panic(err)
 	}
 	fmt.Fprintln(os.Stdout, data.Bid)
