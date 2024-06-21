@@ -19,7 +19,7 @@ func main() {
 
 }
 
-func client(ch chan string) {
+func client(ch chan<- string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
