@@ -29,9 +29,10 @@ func main() {
 		select {
 		case msg := <-ch1: // Brasilapi
 			fmt.Printf("result: %v\n", msg)
+			close(ch2)
 		case msg := <-ch2: // ViaCep
 			fmt.Printf("result: %v\n", msg)
-
+			close(ch1)
 		case <-time.After(time.Second):
 			fmt.Println("timeout")
 		}
