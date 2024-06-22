@@ -17,17 +17,20 @@ func main() {
 		ch1 := make(chan string)
 		ch2 := make(chan string)
 
-		brasilApiUrl := "https://brasilapi.com.br/api/cep/v1/" + cep
-		viaCepUrl := "https://viacep.com.br/ws/" + cep + "/json/"
+		urls := map[string](chan string){
+			"https://brasilapi.com.br/api/cep/v1/" + cep: ch1,
+			"https://viacep.com.br/ws/" + cep + "/json/": ch2,
+		}
 
-		go GetCEPData(brasilApiUrl, ch1)
-		go GetCEPData(viaCepUrl, ch2)
+		for url, ch := range urls {
+			go GetCEPData(url, ch)
+		}
 
 		select {
 		case msg := <-ch1: // Brasilapi
-			fmt.Printf("%v result: %v\n", brasilApiUrl, msg)
+			fmt.Printf("result: %v\n", msg)
 		case msg := <-ch2: // ViaCep
-			fmt.Printf("%v result: %v\n", viaCepUrl, msg)
+			fmt.Printf("result: %v\n", msg)
 
 		case <-time.After(time.Second):
 			fmt.Println("timeout")
@@ -50,4 +53,5 @@ func GetCEPData(url string, ch chan<- string) {
 	}
 
 	ch <- string(resp)
+	fmt.Printf("Get CEP from %v\n", url)
 }
