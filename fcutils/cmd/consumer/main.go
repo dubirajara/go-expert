@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/dubirajara/fcutils/pkg/rabbitmq"
+	"github.com/dubirajara/go-expert/fcutils/pkg/rabbitmq"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

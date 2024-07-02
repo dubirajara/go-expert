@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dubirajara/fcutils/pkg/rabbitmq"
+	"github.com/dubirajara/go-expert/fcutils/pkg/rabbitmq"
 )
 
 func main() {

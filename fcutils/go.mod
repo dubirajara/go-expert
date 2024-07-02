@@ -1,4 +1,4 @@
-module github.com/dubirajara/fcutils
+module github.com/dubirajara/go-expert/fcutils
 
 go 1.22.3
 
