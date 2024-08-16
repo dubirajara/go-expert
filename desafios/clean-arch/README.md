@@ -12,42 +12,33 @@ Inclua um README.md com os passos a serem executados no desafio e a porta em que
 
 ## Paso a paso
 
-1. **Iniciar Rabbit/Mysql com Docker Compose**
+1. **Iniciar a aplicação com Docker Compose**
 
     ```bash
     docker compose up -d
     ```
 
-
-2. **Executar as migraçoes**
-
-    ```bash
-    make migrate
-    ```
-
-3. **Executar a aplicação**
-
-    ```bash
-    make run
-    ```
+    Deve esperar que levante todos os serviços:
+    - Build binario go multistage y inicia a aplicação
+    - RabbitMQ
+    - MysqlDB
+    - Executa migrações
 
 
 ## Testando a aplicação
 
-### API REST
+### API REST:
 
 - **Criar order**: execute o arquivo `/api/create_order.http`.
 - **Listar orders**: execute o arquivo `/api/list_order.http`.
 
-### GraphQL
+
+### GRPC:
 
 ```bash
-evans -r repl
-package pb
-service OrderService
-call CreateOrder
-call ListOrder
+evans --proto internal/infra/grpc/protofiles/order.proto repl
 ```
+
 
 ### GraphQL
 Abre o playground de GraphQL em [http://localhost:8080/](http://localhost:8080/).
@@ -72,4 +63,4 @@ Abre o playground de GraphQL em [http://localhost:8080/](http://localhost:8080/)
             FinalPrice 
         }
     }
-```
+    ```
