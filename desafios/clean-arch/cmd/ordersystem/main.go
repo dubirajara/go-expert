@@ -85,9 +85,35 @@ func getRabbitMQChannel() *amqp.Channel {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
+
 	ch, err := conn.Channel()
 	if err != nil {
 		panic(err)
 	}
+	defer ch.Close()
+
+	_, err = ch.QueueDeclare(
+		"orders", // queue name
+		true,     // durable
+		false,    // auto delete
+		false,    // exclusive
+		false,    // no wait
+		nil,      // arguments
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if err := ch.QueueBind(
+		"orders",     // queue name
+		"",           // routing key
+		"amq.direct", // exchange
+		false,
+		nil); err != nil {
+		panic(err)
+	}
+
 	return ch
 }

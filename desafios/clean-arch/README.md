@@ -19,7 +19,7 @@ Inclua um README.md com os passos a serem executados no desafio e a porta em que
     ```
 
     Deve esperar que levante todos os serviços:
-    - Build binario go multistage y inicia a aplicação
+    - Build binario go multistage e inicia a aplicação
     - RabbitMQ
     - MysqlDB
     - Executa migrações

@@ -1,4 +1,4 @@
-FROM  golang:1.22.3-alpine3.19 AS stage
+FROM  golang:1.23.0-alpine3.20 AS stage
 
 WORKDIR /app
 
@@ -10,7 +10,5 @@ FROM scratch
 
 COPY --from=stage /app/main /main
 COPY --from=stage /app/.env ./
-
-EXPOSE 8000
 
 CMD ["/main"]

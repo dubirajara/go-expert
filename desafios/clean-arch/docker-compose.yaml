@@ -21,7 +21,7 @@ services:
         condition: on-failure
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.2
     container_name: mysqlDB
     restart: always
     networks:
@@ -35,7 +35,7 @@ services:
     volumes:
       - .docker/mysql:/var/lib/mysql
     healthcheck:
-      test: "mysql $$MYSQL_DATABASE -u$$MYSQL_ROOT_USER -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1;'"
+      test: "mysqladmin ping -h mysqlDB -u$$MYSQL_ROOT_USER -p$$MYSQL_ROOT_PASSWORD"
       interval: 5s
       timeout: 5s
       retries: 5
@@ -55,7 +55,7 @@ services:
         condition: service_healthy
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     restart: always
     networks:
@@ -63,11 +63,14 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
+      test: rabbitmq-diagnostics check_port_connectivity
       interval: 5s
       timeout: 5s
       retries: 5
