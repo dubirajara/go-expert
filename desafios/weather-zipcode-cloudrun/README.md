@@ -44,7 +44,7 @@ Entrega:
     ```
     Importante gerar gratis a api key da weatherapi na pagina https://www.weatherapi.com/signup.aspx
 
-2. **Testando com archivo http**
+2. **Testando com arquivo http**
 
     - Execute o arquivo `/api/weather.http`
 
