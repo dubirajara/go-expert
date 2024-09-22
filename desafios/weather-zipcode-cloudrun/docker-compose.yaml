@@ -1,0 +1,16 @@
+services:
+
+  app:
+    restart: always
+    build: .
+    ports:
+      - 8000:8000
+    container_name: go-weather-cloudrun
+    networks:
+      - local-network
+    env_file:
+      - .env
+
+networks:
+  local-network:
+    driver: bridge
